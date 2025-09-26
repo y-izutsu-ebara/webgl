@@ -4,145 +4,26 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | cyber-lab</title>
-    <!-- <link rel="shortcut icon" href="TemplateData/favicon.ico"> -->
-    <style>
-      /* HTML全体の背景色を黒に設定 */
-      body {
-        background-color: #000000 !important;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-      
-      html {
-        background-color: #000000 !important;
-      }
-      
-      /* Unity デフォルトスタイルを強制的に上書き */
-      * {
-        box-sizing: border-box !important;
-      }
-      
-      #unity-container * {
-        display: initial !important;
-        visibility: initial !important;
-        opacity: initial !important;
-      }
-      
-      /* カスタムローディングスタイル */
-      #unity-loading-bar {
-        display: block !important;
-        visibility: visible !important;
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        z-index: 999999 !important;
-        background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
-        border-radius: 15px !important;
-        padding: 30px !important;
-        box-shadow: 0 0 20px rgba(0,0,0,0.8) !important;
-        border: 2px solid #444 !important;
-        width: 400px !important;
-        height: auto !important;
-        opacity: 1 !important;
-        max-width: 90vw !important;
-        max-height: 90vh !important;
-      }
-      
-      #loading-text {
-        display: block !important;
-        visibility: visible !important;
-        color: #ffffff !important;
-        font-family: 'Arial', sans-serif !important;
-        font-size: 24px !important;
-        font-weight: bold !important;
-        text-align: center !important;
-        margin: 0 !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
-        letter-spacing: 1px !important;
-        opacity: 1 !important;
-        z-index: 10000 !important;
-      }
-      
-
-    </style>
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3FQ9B7C4R9"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-3FQ9B7C4R9');
-</script>
-
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=1280 height=720 tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
-        <div id="loading-text">Loading</div>
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
       </div>
       <div id="unity-warning"> </div>
       <div id="unity-footer">
         <div id="unity-logo-title-footer"></div>
+        <div id="unity-fullscreen-button"></div>
         <div id="unity-build-title">cyber-lab</div>
       </div>
     </div>
     <script>
-      // ビューポートフィット用の初期化
-      function initializeViewportFit() {
-        var container = document.getElementById('unity-container');
-        var canvas = document.querySelector("#unity-canvas");
-        
-        if (container && canvas) {
-          console.log('📐 Setting up viewport fit...');
-          container.style.position = 'fixed';
-          container.style.top = '0';
-          container.style.left = '0';
-          container.style.width = '100vw';
-          container.style.height = '100vh';
-          container.style.zIndex = '1';
-          
-          canvas.style.width = '100%';
-          canvas.style.height = '100%';
-          canvas.style.display = 'block';
-          
-          console.log('✅ Viewport fit initialized');
-        }
-      }
-
-      // DOM読み込み完了時にビューポートフィットを設定
-      document.addEventListener('DOMContentLoaded', () => {
-        console.log('📄 DOM loaded - initializing viewport fit...');
-        
-        // デバッグ: ローディング要素の確認
-        var loadingBar = document.getElementById('unity-loading-bar');
-        var loadingText = document.getElementById('loading-text');
-        var loadingPercentage = document.getElementById('loading-percentage');
-        var loadingStatus = document.getElementById('loading-status');
-        
-        console.log('🔍 Loading elements check:');
-        console.log('  unity-loading-bar:', loadingBar ? 'Found' : 'NOT FOUND');
-        console.log('  loading-text:', loadingText ? 'Found' : 'NOT FOUND');
-        console.log('  loading-percentage:', loadingPercentage ? 'Found' : 'NOT FOUND');
-        console.log('  loading-status:', loadingStatus ? 'Found' : 'NOT FOUND');
-        
-        if (loadingBar) {
-          console.log('  loading-bar display:', getComputedStyle(loadingBar).display);
-          console.log('  loading-bar visibility:', getComputedStyle(loadingBar).visibility);
-        }
-        
-        initializeViewportFit();
-      });
-
-      // ウィンドウリサイズ時にビューポートフィットを再適用
-      window.addEventListener('resize', () => {
-        console.log('📐 Window resized - reapplying viewport fit...');
-        initializeViewportFit();
-      });
-
       var canvas = document.querySelector("#unity-canvas");
 
       // Shows a temporary message banner/ribbon for a few seconds, or
@@ -200,92 +81,73 @@
       // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
       // expected to change.
 
-      // モバイル/デスクトップ判定コードを削除 - 全画面表示のため
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+        canvas.style.width = "1920px";
+        canvas.style.height = "1080px";
+      }
 
       document.querySelector("#unity-loading-bar").style.display = "block";
-      
-      // ローディングバーを表示
-      console.log('🎯 Initializing loading screen...');
-      var loadingBar = document.querySelector("#unity-loading-bar");
-      if (loadingBar) {
-        // 強制的に表示（より強力なスタイル適用）
-        loadingBar.style.cssText = `
-          display: block !important;
-          visibility: visible !important;
-          opacity: 1 !important;
-          z-index: 999999 !important;
-          position: fixed !important;
-          top: 50% !important;
-          left: 50% !important;
-          transform: translate(-50%, -50%) !important;
-          background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
-          border: 2px solid #444 !important;
-          border-radius: 15px !important;
-          padding: 30px !important;
-          width: 400px !important;
-          max-width: 90vw !important;
-          box-shadow: 0 0 20px rgba(0,0,0,0.8) !important;
-        `;
-        console.log('✅ Loading screen displayed');
-      } else {
-        console.error('❌ Loading bar element not found!');
-      }
 
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
-        // Loading... アニメーション用の変数
-        var loadingDots = 0;
-        var loadingInterval;
-        
-        // 要素が確実に存在することを確認してからアニメーション開始
-        setTimeout(() => {
-          console.log('🎬 Starting Loading... animation');
-          loadingInterval = setInterval(() => {
-            var loadingElement = document.querySelector("#loading-text");
-            if (loadingElement) {
-              var dots = '.'.repeat(loadingDots);
-              loadingElement.textContent = "Loading" + dots;
-              console.log('🔄 Loading text updated to:', "Loading" + dots);
-              loadingDots = (loadingDots + 1) % 4; // 0, 1, 2, 3 の循環
-            } else {
-              console.error('❌ Loading text element not found for animation');
-            }
-          }, 500); // 0.5秒ごとに更新
-        }, 100); // 100ms待ってからアニメーション開始
-
         createUnityInstance(canvas, config, (progress) => {
-          // プログレス表示は不要（Loading...アニメーションのみ）
-          
-        }).then((unityInstance) => {
-          console.log('✅ Loading complete - removing loading screen...');
-          
-          // Loading...アニメーションを停止
-          if (loadingInterval) {
-            clearInterval(loadingInterval);
-            console.log('⏹️ Loading animation stopped');
-          }
-          
-          // ローディング画面を強制的に削除
-          var loadingBar = document.querySelector("#unity-loading-bar");
-          if (loadingBar) {
-            // DOM要素を完全に削除
-            loadingBar.remove();
-            console.log('🚀 Loading screen completely removed from DOM');
-          } else {
-            console.log('⚠️ Loading bar not found for removal');
-          }
-          
-          // Unity初期化完了 - ビューポートフィットを再適用
-          console.log('🎮 Unity initialized - applying viewport fit...');
-          initializeViewportFit();
+          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                document.querySelector("#unity-loading-bar").style.display = "none";
+                document.querySelector("#unity-fullscreen-button").onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
 
-        }).catch((message) => {
-          // エラー時の処理
-          console.error('❌ Unity loading failed:', message);
-          alert('読み込みエラーが発生しました: ' + message);
-        });
-      };
+                // Unloading web content from DOM so that browser GC can run can be tricky to get right.
+                // This code snippet shows how to correctly implement a Unity content Unload mechanism to a web page.
+
+                // Unloading Unity content enables a web page to reclaim the memory used by Unity, e.g. for
+                // the purpose of later loading another Unity content instance on the _same_ web page.
+
+                // When using this functionality, take caution to carefully make sure to clear all JavaScript code,
+                // DOM element and event handler references to the old content you may have retained, or
+                // otherwise the browser's garbage collector will be unable to reclaim the old page.
+
+                // N.b. Unity content does _not_ need to be manually unloaded when the user is navigating away from
+                // the current page to another web page. The browser will take care to clear memory of old visited
+                // pages automatically. This functionality is only needed if you want to switch between loading
+                // multiple Unity builds on a single web page.
+                var quit = document.createElement("button");
+                quit.style = "margin-left: 5px; background-color: lightgray; border: none; padding: 5px; cursor: pointer";
+                quit.innerHTML = "Unload";
+                document.querySelector("#unity-build-title").appendChild(quit);
+                quit.onclick = () => {
+                  // Quit Unity application execution
+                  unityInstance.Quit().then(() => {
+                    // Remove DOM elements from the page so GC can run
+                    document.querySelector("#unity-container").remove();
+                    canvas = null;
+                    // Remover script elements from the page so GC can run
+                    script.remove();
+                    script = null;
+                  });
+                };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
 
       document.body.appendChild(script);
 
