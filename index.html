@@ -10,38 +10,40 @@
   gtag('config', 'G-3FQ9B7C4R9');
 </script>
 
-<!-- Amplitude Browser SDK（v2系、CDN）-->
-<!--
-<script src="https://cdn.amplitude.com/libs/analytics-browser-2.11.1-min.js"></script>
-<script src="https://cdn.amplitude.com/libs/plugin-session-replay-browser-1.8.0-min.js"></script>
+<!-- Amplitude Browser SDK v2 -->
+<script src="amplitude/analytics-browser-2.11.0-min.js" defer></script>
+<!-- （任意）セッションリプレイを使うならここも置く。読めなければ無視してOK -->
+<script src="amplitude/session-replay-browser-1.10.0-min.js" defer></script>
 <script>
-  amplitude.add(sessionReplay.plugin({ sampleRate: 0.1 })); // 10%だけ録画
-  amplitude.init("b1bad87395faa2bc78f410f21d3b6381", {
-    defaultTracking: {
-      pageViews: true,
-      sessions: true
-    }
-  });
-</script>
--->
+  // Unity からの同期呼び出し用キュー
+  window.__amp = { ready: false, amp: null, q: [] };
+  window.__ampCall = f => window.__amp.ready ? f(window.__amp.amp) : window.__amp.q.push(f);
 
-<script src="https://cdn.amplitude.com/script/b1bad87395faa2bc78f410f21d3b6381.js"></script>
-<script>
-  window.amplitude.add(window.sessionReplay.plugin({ sampleRate: 1 }));
-  window.amplitude.init('b1bad87395faa2bc78f410f21d3b6381', {
-    "fetchRemoteConfig": true, 
-    "autocapture": {
-      "attribution": true,
-      "fileDownloads": true,
-      "formInteractions":true,
-      "pageViews": true,
-      "sessions": true,
-      "elementInteractions": true,
-      "networkTracking": true,
-      "webVitals": true,
-      "frustrationInteractions": true
+  (function boot() {
+    if (!window.amplitude) { setTimeout(boot, 20); return; }
+    const amp = window.amplitude;
+
+    // 読めている場合だけプラグインを追加（optional）
+    if (window.sessionReplay) {
+      amp.add(window.sessionReplay.plugin({ sampleRate: 1 }));
     }
-  });
+
+    // 同期的に init（Promise 前提にしない）
+    amp.init("b1bad87395faa2bc78f410f21d3b6381", {
+      defaultTracking: { pageViews: true, sessions: true }
+    });
+
+    // ここで準備完了にしてOK（UMD直読みではこれで動く）
+    window.__amp.amp = amp;
+    window.__amp.ready = true;
+
+    // 動作確認用に1発送る
+    amp.track("Ping", { source: "html", env: "local", t: Date.now() });
+
+    // Unity 側から貯まっていた呼び出しを流す
+    const q = window.__amp.q.splice(0);
+    q.forEach(fn => fn(amp));
+  })();
 </script>
 
 </head>
