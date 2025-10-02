@@ -11,23 +11,15 @@
 </script>
 
 <!-- Amplitude Browser SDK（v2系、CDN）-->
-<script src="https://cdn.amplitude.com/libs/analytics-browser-2.25.1-min.js" async crossorigin="anonymous"></script>
+<script src="https://cdn.amplitude.com/libs/analytics-browser-2.25.1-min.js"></script>
 <script>
-  // SDKの初期化をPromiseで待てるように
-  window.amplitudeReady = (async () => {
-    // グローバルの amplitude を取得
-    const amp = window.amplitude;
-    // あなたの Amplitude API Key
-    const API_KEY = "b1bad87395faa2bc78f410f21d3b6381";
-    // v2 SDK: init は Promise を返します
-    await amp.init(API_KEY, {
-      defaultTracking: {
-        sessions: true,
-        pageViews: true
-      }
-    });
-    return amp;
-  })();
+  const amp = window.amplitude;
+  amp.init("b1bad87395faa2bc78f410f21d3b6381", {
+    defaultTracking: {
+      sessions: true,
+      pageViews: true
+    }
+  });
 </script>
 
 </head>
